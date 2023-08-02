@@ -47,7 +47,7 @@ main {
 }
 
 .write-btn {
-  background-color: #fe6f0f;
+  background-color: var(--button-primary);
   color: white;
   border-radius: 25px;
   padding: 10px 15px 10px 15px;
@@ -56,4 +56,11 @@ main {
   right: 20px;
   font-size: 15px;
   box-shadow: rgba(0, 0, 0, 0.24) 0px 3px 8px;
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+}
+
+.write-btn:hover {
+  background-color: var(--button-hover);
+  /* rgba(254,111,15,0.8); 맨마직: 흐리게 정도 */
 }
