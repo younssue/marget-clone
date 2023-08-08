@@ -1,5 +1,9 @@
 main {
-  padding: 30px 20px 30px 20px;
+  /* footer 공간이 100px 정도 되는데 
+   padding 값으로 100px 을 주게 되면 
+   스크롤이 아래까지 전부 내려가게됨
+  */
+  padding: 30px 20px 100px 20px;
 }
 .item-list {
   display: flex;

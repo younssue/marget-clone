@@ -74,6 +74,6 @@ async def get_image(item_id):
                              SELECT image FROM items WHERE id={item_id}
                              """).fetchone()[0]
     # 16진법으로 된 값을 가져와서 다시 바이트로
-    return Response(content=bytes.fromhex(image_bytes))
+    return Response(content=bytes.fromhex(image_bytes), media_type='image/*')
 
 app.mount("/", StaticFiles(directory="frontend", html=True), name="frontend")
