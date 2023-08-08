@@ -9,6 +9,7 @@ import sqlite3
 con = sqlite3.connect('db.db', check_same_thread=False)
 cur = con.cursor()
 
+# 테이블이 없을 때 생성해주기
 cur.execute(f"""
             CREATE TABLE IF NOT EXISTS items (
 	            id INTEGER PRIMARY KEY,

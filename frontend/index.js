@@ -1,3 +1,5 @@
+// 글 작성 시간 표시
+
 const calcTime = (timestamp) => {
   //한국시간 UTC +9
   const curTime = new Date().getTime() - 9 * 60 * 60 * 1000;
@@ -13,6 +15,8 @@ const calcTime = (timestamp) => {
   else return "방금 전";
 };
 
+//div 값을 js에서 설정
+//글 목록 div에 넣어서 불러오기
 const renderData = (data) => {
   const main = document.querySelector("main");
   //[].reverse(): ["a","b","c"] -> ["c","b","a"]
@@ -62,6 +66,7 @@ const renderData = (data) => {
   });
 };
 
+//글 목록 불러오기
 const fetchList = async () => {
   const res = await fetch("/items");
   const data = await res.json();
