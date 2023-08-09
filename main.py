@@ -2,6 +2,8 @@ from fastapi import FastAPI, UploadFile, Form, Response
 from fastapi.responses import JSONResponse
 from fastapi.encoders import jsonable_encoder
 from fastapi.staticfiles import StaticFiles
+from fastapi_login import LoginManager
+from fastapi_login.exceptions import InvalidCredentialsException
 from typing import Annotated
 import sqlite3
 
@@ -23,6 +25,68 @@ cur.execute(f"""
             """)
 
 app = FastAPI()
+
+# 로그인 할 때 access_token 생성
+SECRET = 'super-coding'
+manager = LoginManager(SECRET, '/login')
+
+# 회원을 db에서 조회
+
+
+@manager.user_loader()
+def query_user(id):
+    con.row_factory = sqlite3.Row
+    cur = con.cursor()
+    user = cur.execute(f"""
+                      SELECT * FROM users WHERE id='{id}'
+                      """).fetchone()
+
+    return user
+
+# 로그인 기능
+
+
+@app.post('/login')
+def login(id: Annotated[str, Form()],
+          password: Annotated[str, Form()]):
+    user = query_user(id)
+    # print(user['password'])
+    if not user:
+        # 로그인 실패 시 에러메세지 보내기
+        # 로그인 실패시 401
+        raise InvalidCredentialsException
+    elif password != user['password']:
+        # 로그인 성공 시 200
+        raise InvalidCredentialsException
+
+    access_token = manager.create_access_token(data={
+
+        'id': user['id'],
+        'name': user['name'],
+        'email': user['email'],
+
+    })
+
+    return {'access_token': access_token}
+
+
+# 회원가입
+
+
+@app.post('/signup')
+def singup(id: Annotated[str, Form()],
+           password: Annotated[str, Form()],
+           name: Annotated[str, Form()],
+           email: Annotated[str, Form()]
+           ):
+
+    cur.execute(f"""
+                INSERT INTO users(id,name,email,password)
+                VALUES ('{id}','{name}','{email}','{password}')
+                """)
+    con.commit()
+    return '200'
+
 
 # 글작성 -> 디비 저장
 
@@ -76,23 +140,6 @@ async def get_image(item_id):
                              """).fetchone()[0]
     # 16진법으로 된 값을 가져와서 다시 바이트로
     return Response(content=bytes.fromhex(image_bytes), media_type='image/*')
-
-# 회원가입
-
-
-@app.post('/signup')
-def singup(id: Annotated[str, Form()],
-           password: Annotated[str, Form()],
-           name: Annotated[str, Form()],
-           email: Annotated[str, Form()]
-           ):
-
-    cur.execute(f"""
-                INSERT INTO users(id,name,email,password)
-                VALUES ('{id}','{name}','{email}','{password}')
-                """)
-    con.commit()
-    return '200'
 
 
 app.mount("/", StaticFiles(directory="frontend", html=True), name="frontend")
