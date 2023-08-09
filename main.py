@@ -77,4 +77,22 @@ async def get_image(item_id):
     # 16진법으로 된 값을 가져와서 다시 바이트로
     return Response(content=bytes.fromhex(image_bytes), media_type='image/*')
 
+# 회원가입
+
+
+@app.post('/signup')
+def singup(id: Annotated[str, Form()],
+           password: Annotated[str, Form()],
+           name: Annotated[str, Form()],
+           email: Annotated[str, Form()]
+           ):
+
+    cur.execute(f"""
+                INSERT INTO users(id,name,email,password)
+                VALUES ('{id}','{name}','{email}','{password}')
+                """)
+    con.commit()
+    return '200'
+
+
 app.mount("/", StaticFiles(directory="frontend", html=True), name="frontend")
