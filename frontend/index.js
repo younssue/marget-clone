@@ -23,6 +23,8 @@ const renderData = (data) => {
   // data는 배열 식으로 오니까  forEach를 통해 각각의 배열을 돌면서 해당값을 가져옴
   //그런데 reverse()를 사용하니 배열값이 뒤집어지게만 나올 뿐 시간 순서가 맞지 않게 됨
   //그래서 sort()활용 -> 나중에 심화로 배워본다함
+
+  console.log(data);
   data.reverse().forEach(async (obj) => {
     const div = document.createElement("div");
     div.className = "item-list";
@@ -67,10 +69,24 @@ const renderData = (data) => {
 };
 
 //글 목록 불러오기
+
 const fetchList = async () => {
-  const res = await fetch("/items");
+  const access_token = window.localStorage.getItem("token");
+
+  const res = await fetch("/items", {
+    headers: {
+      Authorization: `Bearer ${access_token}`,
+    },
+  });
+  if (res.status === 401) {
+    alert("로그인이 필요합니다");
+    window.location.pathname = "/login.html";
+    return;
+  }
+
   const data = await res.json();
-  //console.log(data);
   renderData(data);
 };
+
+// item 리스트 호출
 fetchList();

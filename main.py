@@ -1,4 +1,4 @@
-from fastapi import FastAPI, UploadFile, Form, Response
+from fastapi import FastAPI, UploadFile, Form, Response, Depends
 from fastapi.responses import JSONResponse
 from fastapi.encoders import jsonable_encoder
 from fastapi.staticfiles import StaticFiles
@@ -32,13 +32,18 @@ manager = LoginManager(SECRET, '/login')
 
 # 회원을 db에서 조회
 
+# data형식이 dict이라면 그 중 id값은 data['id']라고 명시를 해줘야함
+
 
 @manager.user_loader()
-def query_user(id):
+def query_user(data):
+    WHERE_STATEMENTS = f'id="{data}"'
+    if type(data) == dict:
+        WHERE_STATEMENTS = f'''id="{data['id']}"'''
     con.row_factory = sqlite3.Row
     cur = con.cursor()
     user = cur.execute(f"""
-                      SELECT * FROM users WHERE id='{id}'
+                      SELECT * FROM users WHERE {WHERE_STATEMENTS}
                       """).fetchone()
 
     return user
@@ -56,15 +61,20 @@ def login(id: Annotated[str, Form()],
         # 로그인 실패시 401
         raise InvalidCredentialsException
     elif password != user['password']:
-        # 로그인 성공 시 200
+
         raise InvalidCredentialsException
+
+    # 로그인 성공 시 200
+    # JWT 로 변환해서 서버로 보내줌
+    # JWT 사이트에 들어가서 보면,jwt access_token 값으로 받고,그걸로 변환하면 보낸 값을 볼 수 있음
 
     access_token = manager.create_access_token(data={
 
-        'id': user['id'],
-        'name': user['name'],
-        'email': user['email'],
-
+        'sub': {
+            'id': user['id'],
+            'name': user['name'],
+            'email': user['email'],
+        }
     })
 
     return {'access_token': access_token}
@@ -97,7 +107,8 @@ async def create_item(image: UploadFile,
                       price: Annotated[int, Form()],
                       description: Annotated[str, Form()],
                       place: Annotated[str, Form()],
-                      insertAt: Annotated[int, Form()]
+                      insertAt: Annotated[int, Form()],
+                      user=Depends(manager)
                       ):
 
     # image 를 byte로 바꿔서 저장
@@ -115,10 +126,10 @@ async def create_item(image: UploadFile,
 
 
 # 글 목록 불러오기
-
+# user=Depends(manager): 유저가 인증이 된 상태에서만 응답을 보낼 수 있게 한다
 
 @app.get('/items')
-async def get_items():
+async def get_items(user=Depends(manager)):
     # 데이터만 쭈욱 가져오는 것이 아닌, 칼럼명과 함께 가져옴 {id:1, title:운동화..}
     con.row_factory = sqlite3.Row
     cur = con.cursor()
