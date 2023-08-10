@@ -54,3 +54,9 @@ footer {
   transform: scale(0.8);
   /* 폰트차이지로 줄여지지 않을때 sacle이용해서 크기 줄일 수 있다 */
 }
+
+button {
+  outline: none;
+  border: none;
+  background: none;
+}
