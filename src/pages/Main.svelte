@@ -1,7 +1,7 @@
 <script>
   import { onMount } from "svelte";
-  import Footer from "../components/Footer.svelte";
   import { getDatabase, ref, onValue } from "firebase/database";
+  import Nav from "../components/Nav.svelte";
 
   let hour = new Date().getHours();
   let min = new Date().getMinutes();
@@ -17,6 +17,11 @@
     onValue(itemsRef, (snapshot) => {
       const data = snapshot.val();
       items = Object.values(data).reverse();
+      //0:,1:,이렇게 숫자값이 들어감
+      console.log(Object.values(data).reverse());
+      console.log(data);
+      console.log(items);
+      console.log(Object.values(items));
     });
   });
 
@@ -80,5 +85,5 @@
   {/each}
   <a class="write-btn" href="#/write">+ 글쓰기</a>
 </main>
-<Footer location="home" />
+<Nav location="home" />
 <div class="media-info-msg">화면 사이즈를 줄여주세요</div>
